@@ -26,11 +26,16 @@ async function getDownloadLinkFromEnvato(envatoLink) {
         let downloadLinkMessage = null;
         let downloadCountMessage = null;
         while (!downloadLinkMessage || !downloadCountMessage) {
-            let messages = await client.getMessages('@eedownloader_bot', { limit: 1 });
+            let messages = await client.getMessages('@eedownloader_bot', { limit: 2 });
             let message = messages[0].message;
             console.log(message);
             if (message.startsWith('https://l.envato-download.com/')) {
                 downloadLinkMessage = message;
+                if(downloadCountMessage==null && messages[1].includes('You’ve downloaded'))
+                {
+                    downloadCountMessage = messages[1];
+
+                }
             } else if (message.includes('You’ve downloaded')) {
                 downloadCountMessage = message;
             }

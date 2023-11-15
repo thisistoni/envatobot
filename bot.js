@@ -40,7 +40,7 @@ bot.onText(/\/removeuser (.+)/, (msg, match) => {
 bot.onText(/https:\/\/elements.envato.com\/(.+)/, async (msg, match) => {
     const envatoLink = match[0];
     if (isUserAuthorized(msg.from.username)) {
-      const message=  bot.sendMessage(msg.chat.id, "Wird heruntergeladen...");
+       bot.sendMessage(msg.chat.id, "Wird heruntergeladen...");
 
         const answers = await getDownloadLinkFromEnvato(envatoLink);
         if (answers.length === 1 && answers[0].startsWith("Es gab einen Fehler")) {
