@@ -1,5 +1,0 @@
-6345155651:AAEvssxYVopywYWOKh1-990zz40gciqTbdc
-
-
-
-const stringSession = new StringSession("1BAAOMTQ5LjE1NC4xNjcuOTEAUDunvyhhN7z3DoWJOXGGcnPVHAW/Ec4kfNVtKQJZD9xqpVs5pbIqiXpJuoqFm7pcybZVq3O9Mjgrpv9H7X3NGzmIQ57K9PLiKomBV3vPh1ozW+NN+9P5M/niAaXJUvpzmjglfgL5xxiVN3hSWd1Ou6B5HGRtha0zRtud2mxHqa+J3bEyWka80A4c8O4yMfHnTLbo66XUMD2PG3pQrDf1gdYOgyJxLEL5b6IyDMyCRtnJLdEhanYkL90WtJC5W/IOqDVJ+/OO/UTxM2tlpDexc2hZNpf1bU0dsCm0Ta9i+sdgw/oMBi2BePQFn8b5j0/pww3yWSNIezdcu/pfdb8axeI="); // fill this later with the value from session.save()
