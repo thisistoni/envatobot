@@ -33,7 +33,7 @@ async function getDownloadLinkFromEnvato(envatoLink) {
                 downloadLinkMessage = message;
                 if(downloadCountMessage==null && messages[1].message.includes('You’ve downloaded'))
                 {
-                    downloadCountMessage = messages[1];
+                    downloadCountMessage = messages[1].message;
 
                 }
             } else if (message.includes('You’ve downloaded')) {
