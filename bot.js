@@ -56,6 +56,18 @@ bot.onText(/https:\/\/elements.envato.com\/(.+)/, async (msg, match) => {
     }
 });
 
+
+bot.onText(/\/listusers/, (msg) => {
+    if (msg.from.username === adminUsername) {
+        let users = getUsers();
+        let response = users.length > 0 ? "Gespeicherte Nutzer: " + users.join(', ') : "Keine Nutzer gespeichert.";
+        bot.sendMessage(msg.chat.id, response);
+    } else {
+        bot.sendMessage(msg.chat.id, "Du hast keine Berechtigung, diesen Befehl zu nutzen.");
+    }
+});
+
+
 function addUser(username) {
     let users = getUsers();
     if (!users.includes(username)) {
