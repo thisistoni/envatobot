@@ -48,6 +48,7 @@ bot.onText(/https:\/\/elements.envato.com\/(.+)/, async (msg, match) => {
         } else {
             bot.sendMessage(msg.chat.id, answers[0]);
             bot.sendMessage(msg.chat.id, answers[1]);
+            bot.sendMessage("Der Download-Link ist 30 Sekunden gültig.")
         }   
     
     } else {
