@@ -31,7 +31,7 @@ async function getDownloadLinkFromEnvato(envatoLink) {
             console.log(message);
             if (message.startsWith('https://l.envato-download.com/')) {
                 downloadLinkMessage = message;
-                if(downloadCountMessage==null && messages[1].includes('You’ve downloaded'))
+                if(downloadCountMessage==null && messages[1].message.includes('You’ve downloaded'))
                 {
                     downloadCountMessage = messages[1];
 
