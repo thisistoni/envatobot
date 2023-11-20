@@ -53,7 +53,7 @@ async function getDownloadLinkFromEnvato(envatoLink) {
         let answers= [downloadLinkMessage];
         // Extrahiere die Anzahl der Downloads aus der Nachricht
         const downloadCount = downloadCountMessage.match(/downloaded (\d+)/)[1];
-        answers.push(downloadCount+" von 50 Dateien heute heruntergeladen");
+        answers.push(downloadCount+" von 50 Dateien wurden heute heruntergeladen. 📂");
         console.log(answers[0]);
         console.log(answers[1]);
     
