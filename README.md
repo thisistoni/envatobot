@@ -26,6 +26,7 @@ Der Bot arbeitet in mehreren Schritten:
 Um den EnvatoBot zu installieren und einzurichten, folge diesen Schritten:
 
 1. Repository klonen:
+   
 `git clone https://github.com/thisistoni/envatobot.git`
 
 `cd envatobot`
