@@ -43,7 +43,7 @@ bot.onText(/\/start/, (msg) => {
     const opts = {
         reply_markup: {
             inline_keyboard: [
-                [{ text: 'Zur Whitelist hinzufügen', callback_data: 'adduser ' + msg.from.username+' '+msg.from.id}]
+                [{ text: 'Zur Whitelist hinzufügen', callback_data: 'adduser ' + msg.from.username + ' ' + msg.from.id }]
             ]
         }
     };
@@ -109,14 +109,8 @@ bot.onText(/\/files/, async (msg) => {
     if (files.length === 0) {
         bot.sendMessage(msg.chat.id, "Keine Dateien verfügbar.");
         return;
-    }   
+    }
 
-    console.log("File: ", files);    
-    console.log("file_id: ", files[0].file_id);
-    console.log("fileName: ", files[0].fileName);
-    console.log("fileSize: ", files[0].fileSize);
-    console.log("fileId: ", files[0].fileId);
-    console.log("customId: ", files[0].customId);
 
 
     const inlineKeyboard = files.map(file => {
@@ -231,12 +225,12 @@ bot.on('document', async (msg) => {
     const fileName = msg.document.file_name;
     const fileSize = msg.document.file_size;
 
-      // Ermittle die nächste ID
-      const collection = db.collection('files');
-      const lastFile = await collection.find().sort({_id: -1}).limit(1).toArray();
-      const nextId = lastFile.length > 0 ? lastFile[0].customId + 1 : 1;
-      const customId = nextId;
-    
+    // Ermittle die nächste ID
+    const collection = db.collection('files');
+    const lastFile = await collection.find().sort({ _id: -1 }).limit(1).toArray();
+    const nextId = lastFile.length > 0 ? lastFile[0].customId + 1 : 1;
+    const customId = nextId;
+
 
     // Speichere die Datei-Infos in der Datenbank
     await collection.insertOne({ fileId, fileName, fileSize, customId });
@@ -297,7 +291,7 @@ bot.onText(/https:\/\/elements.envato.com\/(.+)/, async (msg, match) => {
         const opts = {
             reply_markup: {
                 inline_keyboard: [
-                    [{ text: 'Zur Whitelist hinzufügen', callback_data: 'adduser ' + msg.from.username+' '+msg.from.id}]
+                    [{ text: 'Zur Whitelist hinzufügen', callback_data: 'adduser ' + msg.from.username + ' ' + msg.from.id }]
                 ]
             }
         };
@@ -392,9 +386,8 @@ bot.on('callback_query', async (callbackQuery) => {
         const customId = action.split('_').slice(1).join('_');
 
         const fileId = await getFileById(customId);
-        console.log("fileId: ", fileId);
-        console.log("customId: ", customId);
-        bot.sendDocument(msg.chat.id,fileId);
+
+        bot.sendDocument(msg.chat.id, fileId);
     }
 
     if (action.startsWith('deletefile_')) {
@@ -409,11 +402,11 @@ bot.on('callback_query', async (callbackQuery) => {
             bot.sendMessage(msg.chat.id, `Fehler beim Löschen der Datei.`);
         }
     }
-    
+
 
     if (action.startsWith('adduser ')) {
         const username = action.split(' ')[1];
-        const chatid= action.split(' ')[2];
+        const chatid = action.split(' ')[2];
 
         if (callbackQuery.from.username === adminUsername) {
             try {
