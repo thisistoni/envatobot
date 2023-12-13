@@ -4,6 +4,7 @@ const path = require('path');
 const { getDownloadLinkFromEnvato } = require('./vvs.js'); // Stelle sicher, dass der Pfad korrekt ist
 require('dotenv').config();
 const { MongoClient } = require('mongodb');
+const { get } = require('http');
 
 const mongoUri = process.env.MONGODB_URI; // Deine MongoDB URI
 const client = new MongoClient(mongoUri);
@@ -93,6 +94,39 @@ bot.onText(/\/donate/, async (msg) => {
     else {
         bot.sendMessage(msg.chat.id, "Du hast keine Berechtigung, diesen Service zu nutzen.");
     }
+});
+
+// USER: Abrufen der Liste der Dateien
+bot.onText(/\/files/, async (msg) => {
+    if (!isDbConnected || !await isUserAuthorized(msg.from.username)) {
+        bot.sendMessage(msg.chat.id, "Du hast keine Berechtigung, diesen Service zu nutzen.");
+        return;
+    }
+
+    const collection = db.collection('files');
+    const files = await collection.find({}).toArray();
+
+    if (files.length === 0) {
+        bot.sendMessage(msg.chat.id, "Keine Dateien verfügbar.");
+        return;
+    }   
+
+    console.log("File: ", files);    
+    console.log("file_id: ", files[0].file_id);
+    console.log("fileName: ", files[0].fileName);
+    console.log("fileSize: ", files[0].fileSize);
+    console.log("fileId: ", files[0].fileId);
+    console.log("customId: ", files[0].customId);
+
+
+    const inlineKeyboard = files.map(file => {
+        // Verwende eine kürzere callback_data, z.B. nur die fileId
+        return [{ text: file.fileName, callback_data: 'sendfile_' + file.customId }];
+    });
+
+    bot.sendMessage(msg.chat.id, "Verfügbare Dateien:", {
+        reply_markup: { inline_keyboard: inlineKeyboard }
+    });
 });
 
 //ADMIN COMMANDS
@@ -188,6 +222,55 @@ bot.onText(/\/shout (.+)/, async (msg, match) => {
     }
 });
 
+bot.on('document', async (msg) => {
+    if (!isDbConnected || msg.from.username !== adminUsername) {
+        return;
+    }
+
+    const fileId = msg.document.file_id;
+    const fileName = msg.document.file_name;
+    const fileSize = msg.document.file_size;
+
+      // Ermittle die nächste ID
+      const collection = db.collection('files');
+      const lastFile = await collection.find().sort({_id: -1}).limit(1).toArray();
+      const nextId = lastFile.length > 0 ? lastFile[0].customId + 1 : 1;
+      const customId = nextId;
+    
+
+    // Speichere die Datei-Infos in der Datenbank
+    await collection.insertOne({ fileId, fileName, fileSize, customId });
+
+    bot.sendMessage(msg.chat.id, `Datei '${fileName}' hochgeladen und gespeichert.`);
+});
+
+
+// Admin-Befehl: Liste der Dateien zum Löschen anzeigen
+bot.onText(/\/deletefiles/, async (msg) => {
+    if (!isDbConnected || msg.from.username !== adminUsername) {
+        bot.sendMessage(msg.chat.id, "Du hast keine Berechtigung, diesen Befehl zu nutzen.");
+        return;
+    }
+
+    const collection = db.collection('files');
+    const files = await collection.find({}).toArray();
+
+    if (files.length === 0) {
+        bot.sendMessage(msg.chat.id, "Keine Dateien zum Löschen verfügbar.");
+        return;
+    }
+
+    const inlineKeyboard = files.map(file => {
+        return [
+            { text: file.fileName, callback_data: 'viewfile_' + file.customId },
+            { text: '🗑️', callback_data: 'deletefile_' + file.customId }
+        ];
+    });
+
+    bot.sendMessage(msg.chat.id, "Wähle eine Datei zum Löschen:", {
+        reply_markup: { inline_keyboard: inlineKeyboard }
+    });
+});
 //MAIN-FUNKTION
 
 bot.onText(/https:\/\/elements.envato.com\/(.+)/, async (msg, match) => {
@@ -288,7 +371,13 @@ async function getUsersWithChatId() {
     }
 }
 
-
+async function getFileById(customId) {
+    const collection = db.collection('files');
+    // Konvertieren der customId in eine Zahl, falls sie als String übergeben wird
+    const numericId = parseInt(customId, 10);
+    const file = await collection.findOne({ customId: numericId });
+    return file ? file.fileId : null;
+}
 
 //CALL BACK QUERY
 bot.on('callback_query', async (callbackQuery) => {
@@ -299,6 +388,28 @@ bot.on('callback_query', async (callbackQuery) => {
         bot.sendMessage(adminChatID, "Datenbank ist derzeit nicht verbunden.");
         return;
     }
+    if (action.startsWith('sendfile_')) {
+        const customId = action.split('_').slice(1).join('_');
+
+        const fileId = await getFileById(customId);
+        console.log("fileId: ", fileId);
+        console.log("customId: ", customId);
+        bot.sendDocument(msg.chat.id,fileId);
+    }
+
+    if (action.startsWith('deletefile_')) {
+        const customId = parseInt(action.split('_').slice(1).join('_'), 10);
+
+        const collection = db.collection('files');
+        const result = await collection.deleteOne({ customId: customId });
+
+        if (result.deletedCount === 1) {
+            bot.sendMessage(msg.chat.id, `Datei erfolgreich gelöscht.`);
+        } else {
+            bot.sendMessage(msg.chat.id, `Fehler beim Löschen der Datei.`);
+        }
+    }
+    
 
     if (action.startsWith('adduser ')) {
         const username = action.split(' ')[1];

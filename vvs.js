@@ -48,7 +48,6 @@ async function getDownloadLinkFromEnvato(envatoLink) {
     
     // Nach dem Aufrufen von client.disconnect()
     client._destroyed = true;
-        await new Promise(resolve => setTimeout(resolve, 9000));
     
         let answers= [downloadLinkMessage];
         // Extrahiere die Anzahl der Downloads aus der Nachricht
