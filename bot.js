@@ -1,7 +1,7 @@
 const TelegramBot = require('node-telegram-bot-api');
 const fs = require('fs');
 const path = require('path');
-const { getDownloadLinkFromEnvato } = require('./vvs.js'); // Stelle sicher, dass der Pfad korrekt ist
+const { getDownloadLinkFromEnvato, getDownloadLinkFromFreepik , getDownloadLinkFromFlaticon} = require('./vvs.js'); // Stelle sicher, dass der Pfad korrekt ist
 require('dotenv').config();
 const { MongoClient } = require('mongodb');
 const { get } = require('http');
@@ -59,14 +59,17 @@ bot.onText(/\/help/, async (msg) => {
     if (await isUserAuthorized(msg.from.username)) {
         bot.sendMessage(msg.chat.id,
             "*ℹ️ HILFE*\n\n" +
-            "*Wie funktioniert der Bot?*\n\n" +
-            "1\\. Besuche die Envato\\-Website und wähle das Asset aus, das du herunterladen möchtest\\.\n" +
-            "2\\. Kopiere den Link zum gewünschten Produkt\\.\n" +
-            "_Beispiel: https://elements\\.envato\\.com/de/protesting\\-man\\-curious\\-situation\\-meme\\-expression\\-8JSMVCV\n_" +
+            "*Wie funktioniert der Bot\\?*\n\n" +
+            "1\\. Besuche die Envato\\-, Flaticon\\- oder Freepik\\-Website und wähle das Asset aus, das du herunterladen möchtest\\.\n" +
+            "2\\. Kopiere den Link zum gewünschten Produkt\\.\n\n" +
+            "_Beispiel Envato:\n https://elements\\.envato\\.com/de/protesting\\-man\\-curious\\-situation\\-meme\\-expression\\-8JSMVCV_\n\n" +
+            "_Beispiel Flaticon:\n https://www\\.flaticon\\.com/free\\-sticker/burn\\_11330355_\n\n" +
+            "_Beispiel Freepik:\n https://www\\.freepik\\.com/free\\-video/close\\-up\\-girl\\-wrapped\\-plastic\\-film\\_178362_\n\n" +
             "3\\. Sende diesen Link an den Bot\\.\n" +
             "4\\. Du erhältst bald darauf deinen Download\\-Link\\.\n\n" +
-            "*Wie viele Downloads sind möglich?*\n\n" +
-            "Es gibt ein tägliches Limit von insgesamt 50 Downloads für alle Nutzer des Bots \\(nicht pro Nutzer\\)\\.\n\n" +
+            "*Wie viele Downloads sind möglich\\?*\n\n" +
+            "Es gibt ein tägliches Limit von insgesamt 50 ENVATO Downloads für alle Nutzer des Bots \\(nicht pro Nutzer\\)\\.\n\n" +
+            "FreePik und Flaticon sind unbegrenzt\\.\n\n" +
             "Bei Fragen oder Problemen kannst du dich an @thisistoni wenden\\.\n\n" +
             "Viel Spaß beim Nutzen des Bots\\! 🚀",
             { parse_mode: 'MarkdownV2' });
@@ -76,6 +79,7 @@ bot.onText(/\/help/, async (msg) => {
         bot.sendMessage(msg.chat.id, "Du hast keine Berechtigung, diesen Service zu nutzen.");
     }
 });
+
 
 bot.onText(/\/donate/, async (msg) => {
 
@@ -283,6 +287,70 @@ bot.onText(/https:\/\/elements.envato.com\/(.+)/, async (msg, match) => {
             bot.sendMessage(msg.chat.id, answers[0]);
             bot.sendMessage(msg.chat.id, answers[1]);
             bot.sendMessage(msg.chat.id, "Der Download-Link ist 30 Sekunden gültig.")
+        }
+
+    } else {
+        bot.sendMessage(msg.chat.id, "Du hast keine Berechtigung, diesen Service zu nutzen.");
+
+        const opts = {
+            reply_markup: {
+                inline_keyboard: [
+                    [{ text: 'Zur Whitelist hinzufügen', callback_data: 'adduser ' + msg.from.username + ' ' + msg.from.id }]
+                ]
+            }
+        };
+
+        bot.sendMessage(adminChatID, "@" + msg.from.username + " hat versucht, etwas herunterzuladen. Zur Whitelist hinzufügen?", opts);
+    }
+});
+
+bot.onText(/https:\/\/www.freepik.com\/(.+)/, async (msg, match) => {
+    if (!isDbConnected) {
+        return;
+    }
+    const freepikLink = match[0];
+    if (await isUserAuthorized(msg.from.username)) {
+        bot.sendMessage(msg.chat.id, "Download läuft...⏳");
+        await updateChatIdForAuthorizedUser(msg.from.username, msg.chat.id);
+
+        const answers = await getDownloadLinkFromFreepik(freepikLink);
+        if (answers.length === 1 && answers[0].startsWith("Es gab einen Fehler")) {
+            bot.sendMessage(msg.chat.id, answers[0]);
+        } else {
+            bot.sendMessage(msg.chat.id, answers[0]);
+            bot.sendMessage(msg.chat.id, "Der Download-Link ist 60 Sekunden gültig. Unendlich Downloads möglich.")
+        }
+
+    } else {
+        bot.sendMessage(msg.chat.id, "Du hast keine Berechtigung, diesen Service zu nutzen.");
+
+        const opts = {
+            reply_markup: {
+                inline_keyboard: [
+                    [{ text: 'Zur Whitelist hinzufügen', callback_data: 'adduser ' + msg.from.username + ' ' + msg.from.id }]
+                ]
+            }
+        };
+
+        bot.sendMessage(adminChatID, "@" + msg.from.username + " hat versucht, etwas herunterzuladen. Zur Whitelist hinzufügen?", opts);
+    }
+});
+
+bot.onText(/https:\/\/www.flaticon.com\/(.+)/, async (msg, match) => {
+    if (!isDbConnected) {
+        return;
+    }
+    const flaticonLink = match[0];
+    if (await isUserAuthorized(msg.from.username)) {
+        bot.sendMessage(msg.chat.id, "Download läuft...⏳");
+        await updateChatIdForAuthorizedUser(msg.from.username, msg.chat.id);
+
+        const answers = await getDownloadLinkFromFlaticon(flaticonLink);
+        if (answers.length === 1 && answers[0].startsWith("Es gab einen Fehler")) {
+            bot.sendMessage(msg.chat.id, answers[0]);
+        } else {
+            bot.sendMessage(msg.chat.id, answers[0]);
+            bot.sendMessage(msg.chat.id, "Der Download-Link ist 60 Sekunden gültig. Unendlich Downloads möglich.")
         }
 
     } else {
