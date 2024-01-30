@@ -36,9 +36,14 @@ connectToMongo();
 
 //BASIC COMMANDS
 
-bot.onText(/\/start/, (msg) => {
+bot.onText(/\/start/, async (msg) => {
 
     bot.sendMessage(msg.chat.id, "Moin! Schick mir einen Envato Link und ich gebe dir die Datei!");
+
+    if (!isDbConnected) {
+        return;
+    }
+    if(!await isUserAuthorized(msg.from.username)){
 
     const opts = {
         reply_markup: {
@@ -48,7 +53,8 @@ bot.onText(/\/start/, (msg) => {
         }
     };
 
-    bot.sendMessage(adminChatID, "@" + msg.from.username + " hat den Bot gestartet. Zur Whitelist hinzufügen?", opts);
+    bot.sendMessage(adminChatID, "@" + msg.from.username +" "+ msg.from.first_name +" "+msg.from.language_code+ " hat den Bot gestartet. Zur Whitelist hinzufügen?", opts);
+}
 });
 
 bot.onText(/\/help/, async (msg) => {
