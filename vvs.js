@@ -37,7 +37,7 @@ async function getDownloadLinkFromEnvato(envatoLink) {
             let messages = await client.getMessages('@AwesomeDownloaderBot', { limit: 2 });
             let message = messages[0].message;
             console.log('Current message: '+message);
-            if (message.startsWith('https://yourl.cc/')) {
+            if (message.includes('https://yourl.cc/')) {
                 downloadLinkMessage = message;
                 if (downloadCountMessage == null && messages[1].message.includes('Your download link is')) {
                     downloadCountMessage = messages[1].message;
