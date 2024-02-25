@@ -99,7 +99,7 @@ async function getDownloadLinkFromFreepik(freepikLink) {
             let messages = await client.getMessages('@AwesomeDownloaderBot', { limit: 1 });
             let message = messages[0].message;
             console.log('Current message: '+message);
-            if (message.startsWith('https://yourl.cc/')) {
+            if (message.includes('https://yourl.cc/')) {
                 downloadLinkMessage = message;
             } 
 
